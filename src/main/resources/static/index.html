@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+ <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <div>
+    <h1>Clientes</h1>
+    <button onclick="agregarCliente()">Agregar</button>
+    <pre id="cliente"></pre>
+  </div>
+  
+  <div>
+    <h1>Envio terrestre</h1>
+    <button onclick="agregarEnvioTerrestre()">Agregar</button>
+    <pre id="envioTerrestre"></pre>
+  </div>
+  
+  <div>
+    <h1>Envio maritimo</h1>
+    <button onclick="agregarEnvioMaritimo()">Agregar</button>
+    <pre id="envioMaritimo"></pre>
+  </div>
+  
+  <script>
+      async function get(url){
+        return fetch(location.origin+'/api/'+url)
+        .then(response => response.json());
+      }
+      
+      async function post(url, body){
+        return fetch(location.origin+'/api/'+url, {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {'Content-Type': 'application/json'}
+        }).then(res => res.json())
+      }
+      
+      async function agregarCliente(){
+        await post("cliente",{id: prompt("cedula"),nombre: prompt("nombre"),direccion: prompt("direccion"),telefono: prompt("telefono")});
+        getClientes();
+      }
+      
+      async function getClientes(){
+        const clients = await get("cliente");
+        let strClients = "cedula,nombre,direccion,telefono\n";
+        clients.forEach(c => {
+          strClients += `${c.id}\t${c.nombre}\t${c.direccion}\t${c.telefono}\n`
+        })
+        document.getElementById("cliente").innerHTML = strClients;
+      }    
+      
+      async function getEnvioTerrestres(){
+        const data = await get("envio-terrestre");
+        let strData = "id\tcliente\ttipoProducto\tcantidadProducto\tfechaRegistro\tfechaEntrega\tbodegaEntrega\tprecioEnvio\tplaca\tnumeroGuia\n";
+        data.forEach(c => {
+          strData += `${c.id}\t${c.cliente}\t${c.tipoProducto}\t${c.cantidadProducto}\t${c.fechaRegistro}\t${c.fechaEntrega}\t${c.bodegaEntrega}\t${c.precioEnvio}\t${c.placa}\t${c.numeroGuia}\n`;
+        })
+        document.getElementById("envioTerrestre").innerHTML = strData;
+      }
+      
+      async function agregarEnvioTerrestre(){
+        const data = await post("envio-terrestre",{
+          cliente: prompt("cedula cliente"),
+          tipoProducto: prompt("tipo producto"),
+          cantidadProducto: prompt("cantidad producto"),
+          fechaRegistro: prompt("fechaRegistro"),
+          fechaEntrega: prompt("fechaEntrega"),
+          bodegaEntrega: prompt("bodegaEntrega"),
+          precioEnvio: prompt("precioEnvio"),
+          placa: prompt("placa"),
+          numeroGuia: prompt("numeroGuia")
+        });
+        if(data.errors && data.errors.length>0){
+          alert("La información ingresada no es valida, validar que se este llenando correctamente el numero de guia (ej: 0123456789) y la placa (ej:esd321)");
+        }
+        getEnvioTerrestres();
+      }
+      
+      async function getEnvioMaritimos(){
+        const data = await get("envio-maritimo");
+        let strData = "id\tcliente\ttipoProducto\tcantidadProducto\tfechaRegistro\tfechaEntrega\tpuertoEntrega\tprecioEnvio\tnumeroFlota\tnumeroGuia\n";
+        data.forEach(c => {
+          strData += `${c.id}\t${c.cliente}\t${c.tipoProducto}\t${c.cantidadProducto}\t${c.fechaRegistro}\t${c.fechaEntrega}\t${c.puertoEntrega}\t${c.precioEnvio}\t${c.numeroFlota}\t${c.numeroGuia}\n`;
+        })
+        document.getElementById("envioMaritimo").innerHTML = strData;
+      }
+      
+      async function agregarEnvioMaritimo(){
+        const data = await post("envio-maritimo",{
+          cliente: prompt("cedula cliente"),
+          tipoProducto: prompt("tipo producto"),
+          cantidadProducto: prompt("cantidad producto"),
+          fechaRegistro: prompt("fechaRegistro"),
+          fechaEntrega: prompt("fechaEntrega"),
+          puertoEntrega: prompt("puertoEntrega"),
+          precioEnvio: prompt("precioEnvio"),
+          numeroFlota: prompt("numeroFlota"),
+          numeroGuia: prompt("numeroGuia")
+        });
+        if(data.errors && data.errors.length>0){
+          alert("La información ingresada no es valida, validar que se este llenando correctamente el numero de flota ej: asd1234a y el numero de guia (ej: 0123456789)");
+        }
+        getEnvioMaritimos();
+      }
+      
+      
+      getClientes();
+      getEnvioTerrestres();
+      getEnvioMaritimos();
+    </script>
+</body>
+</html>
